@@ -8,15 +8,20 @@ import abstraction.eqXRomu.filiere.Filiere;
 import abstraction.eqXRomu.filiere.IActeur;
 import abstraction.eqXRomu.general.Journal;
 import abstraction.eqXRomu.general.Variable;
+import abstraction.eqXRomu.produits.Feve;
 import abstraction.eqXRomu.produits.IProduit;
 
 public class Transformateur2Acteur implements IActeur {
 	
 	protected int cryptogramme;
-	private Journal journal;
+	protected Journal journal;
+	protected Variable stocktotal;
+	protected Feve feve;
 
 	public Transformateur2Acteur() {
 		this.journal = new Journal("Journal Equipe 5", this);
+		this.stocktotal = new Variable("Stock Equipe 5", this);
+		this.feve = Feve.F_MQ;
 	}
 	
 	public void initialiser() {
@@ -37,6 +42,7 @@ public class Transformateur2Acteur implements IActeur {
 	public void next() {
 		int etape = Filiere.LA_FILIERE.getEtape();
 		this.journal.ajouter("Etape numéro : " + etape);
+		this.stocktotal.setValeur(this, this.getQuantiteEnStock(null, this.cryptogramme), this.cryptogramme);
 	}
 
 	public Color getColor() {// NE PAS MODIFIER
@@ -50,6 +56,7 @@ public class Transformateur2Acteur implements IActeur {
 	// Renvoie les indicateurs
 	public List<Variable> getIndicateurs() {
 		List<Variable> res = new ArrayList<Variable>();
+		res.add(stocktotal);
 		return res;
 	}
 
@@ -62,6 +69,7 @@ public class Transformateur2Acteur implements IActeur {
 	// Renvoie les journaux
 	public List<Journal> getJournaux() {
 		List<Journal> res=new ArrayList<Journal>();
+		res.add(journal);
 		return res;
 	}
 
