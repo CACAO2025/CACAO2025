@@ -105,7 +105,6 @@ public class BourseCacao implements IActeur, IAssermente {
 		res.add(affichageGraphiques);
 		return res;
 	}
-
 	public List<Variable> getParametres() {
 		return new LinkedList<Variable>();
 	}
