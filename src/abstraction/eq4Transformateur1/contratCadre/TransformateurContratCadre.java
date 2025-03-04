@@ -8,12 +8,13 @@ import abstraction.eqXRomu.filiere.*;
 import abstraction.eqXRomu.general.*;
 import abstraction.eqXRomu.produits.IProduit;
 import abstraction.eqXRomu.contratsCadres.*;
+import abstraction.eq4Transformateur1.Transformateur1Stocks;
 
 /*
  * @author MURY Julien
  * Cette classe décrit le comportement de Transfromateur1 lors d'un contrat cadre
  */
-public class TransformateurContratCadre implements IActeur {
+public class TransformateurContratCadre extends Transformateur1Stocks implements IActeur {
 	private static int NB_INSTANCES = 0; // Afin d'attribuer un nom different a toutes les instances
 	protected int numero;
 	protected Variable stock;
@@ -29,6 +30,8 @@ public class TransformateurContratCadre implements IActeur {
 		NB_INSTANCES++;
 		this.numero=NB_INSTANCES;
 		this.produit=produit;
+		//A MODIFIER APRES CREATION GESTION DES STOCKS
+		//Il faudra un stock de fève ou de chocolat selon si notre acteur est vendeur ou acheteur
 		this.stock=new Variable(getNom()+" stock ", null, this, 0, 1000, 300);
 		this.journal = new Journal(this.getNom()+" activites", this);
 	}
