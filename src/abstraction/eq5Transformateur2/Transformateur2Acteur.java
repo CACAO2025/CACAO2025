@@ -42,7 +42,7 @@ public class Transformateur2Acteur implements IActeur {
 	public void next() {
 		int etape = Filiere.LA_FILIERE.getEtape();
 		this.journal.ajouter("Etape numéro : " + etape);
-		this.stocktotal.setValeur(this, this.getQuantiteEnStock(null, this.cryptogramme), this.cryptogramme);
+		//this.stocktotal.setValeur(this, this.getQuantiteEnStock(null, this.cryptogramme), this.cryptogramme);
 	}
 
 	public Color getColor() {// NE PAS MODIFIER
@@ -50,7 +50,7 @@ public class Transformateur2Acteur implements IActeur {
 	}
 
 	public String getDescription() {
-		return "Un transformateur reconnu pour son éthique et sa qualité haut de gamme";
+		return "Bla bla bla";
 	}
 
 	// Renvoie les indicateurs
@@ -62,13 +62,13 @@ public class Transformateur2Acteur implements IActeur {
 
 	// Renvoie les parametres
 	public List<Variable> getParametres() {
-		List<Variable> res = new ArrayList<Variable>();
+		List<Variable> res=new ArrayList<Variable>();
 		return res;
 	}
 
 	// Renvoie les journaux
 	public List<Journal> getJournaux() {
-		List<Journal> res = new ArrayList<Journal>();
+		List<Journal> res=new ArrayList<Journal>();
 		res.add(journal);
 		return res;
 	}
