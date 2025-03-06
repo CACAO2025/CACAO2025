@@ -2,22 +2,31 @@ package abstraction.eq9Distributeur3;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import abstraction.eqXRomu.filiere.Filiere;
 import abstraction.eqXRomu.filiere.IActeur;
 import abstraction.eqXRomu.general.Journal;
 import abstraction.eqXRomu.general.Variable;
+import abstraction.eqXRomu.produits.ChocolatDeMarque;
 import abstraction.eqXRomu.produits.IProduit;
 
 public class Distributeur3Acteur implements IActeur {
 	
 	protected int cryptogramme;
+	private Journal journalActeur;
+
+	protected HashMap<ChocolatDeMarque, Double> stockChocoMarque;
+	protected List<ChocolatDeMarque> chocolatsVillors;
+
 
 	public Distributeur3Acteur() {
+		Journal journalActeur = new Journal("journal d'acteur",this);
 	}
 	
 	public void initialiser() {
+		stockChocoMarque = new HashMap<>();
 	}
 
 	public String getNom() {// NE PAS MODIFIER
@@ -33,6 +42,7 @@ public class Distributeur3Acteur implements IActeur {
 	////////////////////////////////////////////////////////
 
 	public void next() {
+		journalActeur.ajouter("étape : "+Filiere.LA_FILIERE.getEtape());
 	}
 
 	public Color getColor() {// NE PAS MODIFIER
@@ -58,6 +68,7 @@ public class Distributeur3Acteur implements IActeur {
 	// Renvoie les journaux
 	public List<Journal> getJournaux() {
 		List<Journal> res=new ArrayList<Journal>();
+		//res.add(journalActeur);
 		return res;
 	}
 
