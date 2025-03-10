@@ -42,7 +42,6 @@ package abstraction.eqXRomu.acteurs;
 			this.chocosProduits = new LinkedList<ChocolatDeMarque>();
 			this.journal = new Journal("DX Journal", this);
 			this.totalStocksChocoMarque = new VariablePrivee("EqXDStockChocoMarque", "<html>Quantite totale de chocolat de marque en stock</html>",this, 0.0, 1000000.0, 0.0);
-
 		}
 
 		public void initialiser() {
