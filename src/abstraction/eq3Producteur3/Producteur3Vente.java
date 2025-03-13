@@ -13,7 +13,7 @@ import abstraction.eqXRomu.produits.IProduit;
 import java.util.List;
 import java.util.ArrayList;
 
-
+// Paul
 public class Producteur3Vente extends Producteur3Stock implements IVendeurBourse, IVendeurContratCadre{
     protected List<ExemplaireContratCadre> mesContratCadres = new ArrayList<ExemplaireContratCadre>();
 
@@ -26,7 +26,7 @@ public class Producteur3Vente extends Producteur3Stock implements IVendeurBourse
 
     // VENTE EN BOURSE //
 
-    // Paul
+    
     @Override
     public double offre(Feve feve, double cours) {
        
