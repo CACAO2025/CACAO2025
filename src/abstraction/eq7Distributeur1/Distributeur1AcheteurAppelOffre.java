@@ -1,41 +1,46 @@
 package abstraction.eq7Distributeur1;
 ///Maxime GUY///
+
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 
+import abstraction.eqXRomu.appelDOffre.SuperviseurVentesAO;
+import abstraction.eqXRomu.appelDOffre.IAcheteurAO;
+import abstraction.eqXRomu.appelDOffre.OffreVente;
 import abstraction.eqXRomu.encheres.Enchere;
-import abstraction.eqXRomu.encheres.IAcheteurAuxEncheres;
-import abstraction.eqXRomu.encheres.MiseAuxEncheres;
 import abstraction.eqXRomu.filiere.Filiere;
 import abstraction.eqXRomu.filiere.IActeur;
 import abstraction.eqXRomu.general.Journal;
 import abstraction.eqXRomu.general.Variable;
-import abstraction.eqXRomu.produits.Chocolat;
 import abstraction.eqXRomu.produits.ChocolatDeMarque;
+import abstraction.eqXRomu.produits.Chocolat;
 import abstraction.eqXRomu.produits.IProduit;
 
-public class Distributeur1AcheteurEncheres implements IAcheteurAuxEncheres  {
+public class Distributeur1AcheteurAppelOffre implements IAcheteurAO  {
 
 	protected Integer cryptogramme;
-	private List<Double> priceProduct;
+	private IAcheteurAO identity;
 	private List<Double> requiredQuantities;
-	private List<Integer> successedSell;
-	private String name;
 	private Color color;
+	private String name;
 	private List<Double> stock;
+	private List<Double> priceProduct;
 
-	public Distributeur1AcheteurEncheres(List<Double> priceProduct, List<Double> requiredQuantities, String name, Color color, List<Double> stock) {
+	public Distributeur1AcheteurAppelOffre(List<Double> requiredQuantities, IAcheteurAO identity,Color color,String name,List<Double> stock, List<Double> priceProduct) {
 		super();
-		this.priceProduct = priceProduct;
-		this.name = name ;
-		this.color = color;
 		this.requiredQuantities = requiredQuantities;
+		this.identity = identity;
+		this.color = color;
+		this.name = name;
 		this.stock = stock;
+		this.priceProduct = priceProduct;
+
 	}
 
-	    public int getInt(Chocolat product){
+	public int getInt(Chocolat product){
         int idProduct = 0;
         switch(product.getGamme()){
             case BQ : idProduct=0;
@@ -50,23 +55,31 @@ public class Distributeur1AcheteurEncheres implements IAcheteurAuxEncheres  {
         }
         return(idProduct);
     }
-
-	public double proposerPrix(MiseAuxEncheres encheres){
-		IProduit product = encheres.getProduit();
+	
+	public OffreVente choisirOV(List<OffreVente> propositions){
+		int indice = -1;
+		IProduit product = propositions.get(0).getProduit();
 		if (product instanceof ChocolatDeMarque) {
         	ChocolatDeMarque chocolat = (ChocolatDeMarque) product;
-			double volume = encheres.getQuantiteT();
 			int idProduct = getInt(chocolat.getChocolat());
-			double price = this.priceProduct.get(idProduct);
-			double wantedquantity = this.requiredQuantities.get(idProduct);
-			int numberSuccessedSell = this.successedSell.get(idProduct);
-			if (wantedquantity<volume){
-				return(price*(0.9+0.1*(1-Math.exp(-1*numberSuccessedSell/5))*(1-Math.exp((wantedquantity-volume)/1000))));
+			double price = 1.03*this.priceProduct.get(idProduct) ;
+			for (int i=0; i<propositions.size(); i++){
+				double priceProposed = propositions.get(i).getPrixT();
+				if (priceProposed<price){
+					indice = i;
+					price = priceProposed;
+					}
+				}
 			}
-		return(price*(1.1+0.02*numberSuccessedSell));
+		
+		if (indice == -1){
+			return(null);
 		}
-		return(0);
-	}
+		return(propositions.get(indice));
+		}
+	
+
+
 	public void initialiser(){
 
 	}
@@ -76,7 +89,7 @@ public class Distributeur1AcheteurEncheres implements IAcheteurAuxEncheres  {
 	}
 	public void notifierEnchereNonRetenue(Enchere enchereNonRetenue){
 		
-	};
+	}
 
 	public String getNom(){
 		return(this.name);
@@ -87,11 +100,16 @@ public class Distributeur1AcheteurEncheres implements IAcheteurAuxEncheres  {
 	}
 
 	public String getDescription(){
-		return("Acheteur aux encheres de l'equipe 7");
+		return("Appelleur d'offre de l'equipe 7");
 	}
 
 	public void next(){
-
+		SuperviseurVentesAO superviseur = new SuperviseurVentesAO();
+		superviseur.acheterParAO(this.identity,this.cryptogramme, Chocolat.C_BQ , this.requiredQuantities.get(0));
+		superviseur.acheterParAO(this.identity,this.cryptogramme, Chocolat.C_BQ_E , this.requiredQuantities.get(1));
+		superviseur.acheterParAO(this.identity,this.cryptogramme, Chocolat.C_MQ , this.requiredQuantities.get(2));
+		superviseur.acheterParAO(this.identity,this.cryptogramme, Chocolat.C_MQ_E , this.requiredQuantities.get(3));
+		superviseur.acheterParAO(this.identity,this.cryptogramme, Chocolat.C_HQ_E , this.requiredQuantities.get(4));
 	}
 
 	public List<Variable> getIndicateurs(){
@@ -143,3 +161,5 @@ public class Distributeur1AcheteurEncheres implements IAcheteurAuxEncheres  {
 	}
 	
 }
+
+
