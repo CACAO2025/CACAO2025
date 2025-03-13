@@ -58,10 +58,18 @@ public class Echeancier {
 	 */
 	public Echeancier(int stepDebut, List<Double> quantites) {
 		this(stepDebut);
+		double total =0.0;
 		for (Double d : quantites) {
 			if (d<0.0) {
 				throw new IllegalArgumentException("Le constructeur(Echeancier((stepDebut, quantites) est appele avec une liste comportant une/des valeurs negatives : "+quantites);
 			}
+			total+=d;
+		}
+		for (Double d : quantites) {
+			if (d<total/(10*quantites.size())) {
+				throw new IllegalArgumentException("Le constructeur(Echeancier((stepDebut, quantites) est appele avec une liste comportant une des quantite inferieure a la somme total des quantite divisee par 10 fois la duree "+quantites);
+			}
+			total+=d;
 		}
 		this.quantites = new LinkedList<Double>(quantites);
 	}
