@@ -40,7 +40,7 @@ public class Distributeur1Acteur implements IActeur {
 	}
 
 	public String getDescription() {
-		return "Bla bla bla";
+		return "Nous sommes HexaFridge, nous sommes unis et indivisible, nous sommes la source de toute consommation";
 	}
 
 	// Renvoie les indicateurs
