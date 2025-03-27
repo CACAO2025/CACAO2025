@@ -68,7 +68,10 @@ public class Transformateur3AcheteurBourse extends Transformateur3ContratCadreAc
         //fève MQ
         //fève HQ équitable 
         // tout cela c'est la filière le code mère qui va s'en occuper ce n'est pas notre rôle
+        //on pourra implémenter ici notre stratégie
+        //on récupère le next de tous les pères
         super.next();
+        
     }
 
     //méthodes pour correspondre à l'interface IAcheteur
@@ -82,26 +85,16 @@ public class Transformateur3AcheteurBourse extends Transformateur3ContratCadreAc
 	 */
     @Override
     public double demande(Feve f, double cours) {
+        //seules les fèbes BQ et MQ sont côtés en Bourse. 
         //fève BQ de nom java : Feve.F_BQ
         if (f==Feve.F_BQ){
             double a = super.stockFeves.getQuantityOf(Feve.F_BQ);
-            if (a<100000){
-                double b = 100000 - a;
-                //rajouter à la liste de feves, stock et prix voulu 
-                StockFevevouluencours.add(b);
-                Fevevoulueencours.add(f);
-                Prixvoulusencours.add(a*cours);
-                return b;
-            }
-            else{
+            //un prix vraiment trop cher
+            if (cours>2500){
                 return 0;
             }
-        }
-        //fève BQ équitable  
-        if (f==Feve.F_BQ_E){
-            double a = super.stockFeves.getQuantityOf(Feve.F_BQ_E);
-            if (a<100000){
-                double b = 100000 - a;
+            if (a<25000){
+                double b = 25000 - a;
                 //rajouter à la liste de feves, stock et prix voulu 
                 StockFevevouluencours.add(b);
                 Fevevoulueencours.add(f);
@@ -115,23 +108,12 @@ public class Transformateur3AcheteurBourse extends Transformateur3ContratCadreAc
         //fève MQ
         if (f==Feve.F_MQ){
             double a = super.stockFeves.getQuantityOf(Feve.F_MQ);
-            if (a<100000){
-                double b = 100000 - a;
-                //rajouter à la liste de feves, stock et prix voulu 
-                StockFevevouluencours.add(b);
-                Fevevoulueencours.add(f);
-                Prixvoulusencours.add(a*cours);
-                return b;
-            }
-            else{
+            //un prix vraiment trop cher
+            if (cours>2500){
                 return 0;
             }
-        }
-        //fève HQ équitable 
-        if (f==Feve.F_HQ_E){
-            double a = super.stockFeves.getQuantityOf(Feve.F_HQ_E);
-            if (a<100000){
-                double b = 100000 - a;
+            if (a<25000){
+                double b = 25000 - a;
                 //rajouter à la liste de feves, stock et prix voulu 
                 StockFevevouluencours.add(b);
                 Fevevoulueencours.add(f);
@@ -160,7 +142,7 @@ public class Transformateur3AcheteurBourse extends Transformateur3ContratCadreAc
     public void notificationAchat(Feve f, double quantiteEnT, double coursEnEuroParT) {
         //avertir l'acheteur qu'il vient d'acheter quantiteEnT tonnes de feve f 
         //au prix de  coursEnEuroParT euros par tonne.
-        journalBourse.ajouter("vous venez d'acheter de la fève"+f+"au prix de"+coursEnEuroParT+"par tonne");
+        journalBourse.ajouter("vous venez d'acheter "+quantiteEnT +" de la fève "+f+" au prix de "+coursEnEuroParT+" par tonne");
         //L'acteur this doit augmenter son stock de feves de type f de la quantite quantiteEnT.
         super.stockFeves.addToStock(f,quantiteEnT);
         //rajouter à liste de stocks et de fèves et de prix faits

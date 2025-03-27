@@ -7,7 +7,7 @@ import abstraction.eqXRomu.filiere.Filiere;
 import abstraction.eqXRomu.general.Journal;
 import abstraction.eqXRomu.general.Variable;
 
-public class Transformateur3 extends Transformateur3AcheteurBourse{
+public class Transformateur3 extends Transformateur3AO{
 
 	public Transformateur3() {
 	}
@@ -28,8 +28,14 @@ public class Transformateur3 extends Transformateur3AcheteurBourse{
 		double stockTotal = super.stockFeves.getStockTotal()+super.stockChoco.getStockTotal();
 		//On paye les coûts de stockage
 
+		
 		super.coutStockage = 4*Filiere.LA_FILIERE.getParametre("cout moyen stockage producteur").getValeur();
 		super.LaBanque.payerCout(this, super.cryptogramme, "Coûts de stockage", super.coutStockage*stockTotal);
+		
+		super.jdb.ajouter("Stock total : "+stockTotal);
+		double div = 1000.0;
+		String suff = "k€";
+		super.jdb.ajouter("Payement Coût stockage : "+Math.round(super.coutStockage*stockTotal/div)+suff);
 
 		super.stockFeves.display();
 		super.stockChoco.display();
@@ -43,6 +49,7 @@ public class Transformateur3 extends Transformateur3AcheteurBourse{
 		res.add(super.journalTransac);
 		res.add(super.journalCC);
 		res.add(super.journalBourse);
+		res.add(super.journalAO);
 		return res;
 	}
 

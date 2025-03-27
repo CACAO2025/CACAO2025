@@ -28,6 +28,7 @@ public class Transformateur3Acteur implements IActeur {
 	protected Journal journalTransac;
 	protected Journal journalCC;
 	protected Journal journalBourse;
+	protected Journal journalAO;
 
 	protected List<IProduit> lesFeves;
 	protected List<IProduit> lesChocolats;
@@ -45,14 +46,16 @@ public class Transformateur3Acteur implements IActeur {
 	protected Variable eq6_Q_Bollo;
 	protected Variable eq6_Q_Arna;
 	protected Variable eq6_Q_Hypo;
+	
+		public Transformateur3Acteur() {
+			// Initialisation des journaux
+			this.jdb = new Journal("Journal de bord", this);
+			this.journalStock = new Journal("Journal des stocks", this);
+			this.journalTransac = new Journal("Journal des transactions", this);
+			this.journalCC = new Journal("Journal des contrats cadre", this);
+			this.journalBourse = new Journal("Journal de la Bourse", this);
+			this.journalAO = new Journal("Journal des appels d'offre", this);
 
-	public Transformateur3Acteur() {
-		// Initialisation des journaux
-		this.jdb = new Journal("Journal de bord", this);
-		this.journalStock = new Journal("Journal des stocks", this);
-		this.journalTransac = new Journal("Journal des transactions", this);
-		this.journalCC = new Journal("Journal des contrats cadre", this);
-		this.journalBourse = new Journal("Journal de la Bourse", this);
 
 
 		// Initialisation des indicateurs
