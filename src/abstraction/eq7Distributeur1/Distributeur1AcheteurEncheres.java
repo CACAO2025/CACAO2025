@@ -22,7 +22,7 @@ public class Distributeur1AcheteurEncheres extends Distributeur1AcheteurContratC
 	//protected Integer cryptogramme;
 	//private List<Double> priceProduct;
 	//private List<Double> requiredQuantities;
-	private List<Integer> successedSell;
+	protected List<Integer> successedSell;
 	//private String name;
 	//private Color color;
 	//private HashMap<ChocolatDeMarque,Variable> stock;
@@ -31,125 +31,116 @@ public class Distributeur1AcheteurEncheres extends Distributeur1AcheteurContratC
 		super();
 
 		List<Integer> successedSell = new ArrayList<>();
+		/*
 		for (int i=0; i<6; i++){
 			successedSell.add(i,0);
 		}
+			*/
 		//this.priceProduct = priceProduct;
 		//this.name = name ;
 		//this.color = color;
 		//this.requiredQuantities = requiredQuantities;
 		//this.stock = stock;
 		this.successedSell = successedSell;
-	}
+	} 
 
-	public int getInt(Chocolat product){
-        int idProduct = 0;
-        switch(product.getGamme()){
-            case BQ : idProduct=0;
-            case MQ : idProduct=2;
-            case HQ : idProduct=4;
-        }
-        if (product.isBio()){
-            idProduct++;
-        }
-        if (product.isEquitable()){
-            idProduct++;
-        }
-		if(idProduct == 5)
-		{
-			return 4;
-		}
-		if(idProduct == 6)
-		{
-			return 5;
-		}
-        return(idProduct);
-    }
-
+	@Override
 	public double proposerPrix(MiseAuxEncheres encheres){
 		IProduit product = encheres.getProduit();
 		if (product instanceof ChocolatDeMarque) {
         	ChocolatDeMarque chocolat = (ChocolatDeMarque) product;
 			double volume = encheres.getQuantiteT();
-			int idProduct = getInt(chocolat.getChocolat());
+			int idProduct = cdmToInt(chocolat);
 			double price = this.priceProduct.get(idProduct)*volume;
 			double wantedquantity = this.requiredQuantities.get(idProduct);
 			int numberSuccessedSell = this.successedSell.get(idProduct);
 			if (wantedquantity<volume){
-				return(price*(0.9+0.1*(1-Math.exp(-1*numberSuccessedSell/5))*(1-Math.exp((wantedquantity-volume)/1000))));
+				return(Math.min(price*(0.9+0.1*(1-Math.exp(-1*numberSuccessedSell/5))*(1-Math.exp((wantedquantity-volume)/1000))), price*1.5));
 			}
-		return(price*(1.1+0.02*numberSuccessedSell));
+		return(Math.min(price*(1.1+0.02*numberSuccessedSell),price*1.5));
 		}
 		return(0);
 	}
+
+	@Override
 	public void initialiser(){
 
 	}
-
+	@Override
 	public void notifierAchatAuxEncheres(Enchere enchereRetenue){
 		IProduit product = enchereRetenue.getProduit();
 		if (product instanceof ChocolatDeMarque){
 			ChocolatDeMarque chocolat = (ChocolatDeMarque) product;
-		this.successedSell.set(getInt(chocolat.getChocolat()),this.successedSell.get(getInt(chocolat.getChocolat())+1));
+		this.successedSell.set(cdmToInt(chocolat),this.successedSell.get(cdmToInt(chocolat))+1);
+		this.getStock(chocolat).ajouter(this, enchereRetenue.getQuantiteT());
 		}
 	}
+
+	@Override
 	public void notifierEnchereNonRetenue(Enchere enchereNonRetenue){
 		IProduit product = enchereNonRetenue.getProduit();
 		if (product instanceof ChocolatDeMarque){
 			ChocolatDeMarque chocolat = (ChocolatDeMarque) product;
-		this.successedSell.set(getInt(chocolat.getChocolat()),this.successedSell.get(getInt(chocolat.getChocolat())-1));
+		this.successedSell.set(cdmToInt(chocolat),this.successedSell.get(cdmToInt(chocolat))-1);
 		}
 	}
 
+	@Override
 	public String getNom(){
 		return(this.name);
 	}
 
+	@Override
 	public Color getColor(){
 		return(this.color);
 	}
 
+	@Override
 	public String getDescription(){
 		return("Acheteur aux encheres de l'equipe 7");
 	}
 
-	public void next(){
+	@Override
+	public void next(){}
 
-	}
-
+	@Override
 	public List<Variable> getIndicateurs(){
 		List<Variable> indicateurs = new ArrayList<Variable>();
 		return(indicateurs);
 	}
 
+	@Override
 	public List<Variable> getParametres(){
 		List<Variable> parametres = new ArrayList<Variable>();
 		return(parametres);
 	}
-
+	@Override
 	public List<Journal> getJournaux(){
 		List<Journal> journaux = new ArrayList<Journal>();
 		return(journaux);
 	}
-
+	@Override
 	public void notificationFaillite(IActeur acteur){
 
 	}
-
+	@Override
 	public void notificationOperationBancaire(double montant){
 
 	}
 
+	@Override
 	public List<String> getNomsFilieresProposees(){
 		List<String> noms = new ArrayList<String>();
 		return(noms);
 	}
 
+	@Override
 	public Filiere getFiliere(String nom){
 		Filiere test = new Filiere(0);
 		return(test);
 	}
 
+	@Override
 	public double getQuantiteEnStock(IProduit p, int cryptogramme ){
 		if (this.cryptogramme == cryptogramme){
 			if (p instanceof ChocolatDeMarque){
