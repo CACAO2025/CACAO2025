@@ -67,13 +67,13 @@ public class Producteur3GestionDesCoûts extends Producteur3Employés{
                 return cumpHQ;
             }
         }
-        }
+    }
 
-        void actualiserJournalCump(){
-            journalCump.ajouter("-----ETAPE " + Filiere.LA_FILIERE.getEtape() + "-----\n");
-            for (Feve feve : Feve.values()){
-                journalCump.ajouter("CUMP " + feve + " : " + getCump(feve) + "\n");
-            }
+    void actualiserJournalCump(){
+        journalCump.ajouter("-----ETAPE " + Filiere.LA_FILIERE.getEtape() + "-----\n");
+        for (Feve feve : Feve.values()){
+            journalCump.ajouter("CUMP " + feve + " : " + getCump(feve) + "\n");
         }
+    }
     }
 

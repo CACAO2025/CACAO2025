@@ -15,12 +15,16 @@ import abstraction.eqXRomu.general.VariablePrivee;
 import abstraction.eqXRomu.produits.Feve;
 import abstraction.eqXRomu.produits.IProduit;
 
+//Paul, Alice, Zoé
+
 public class Producteur3Acteur implements IActeur {
 	
 	protected int cryptogramme;
 	protected Journal journal = new Journal("Journal Eq3",this);
 	protected Journal journalMasseSalariale = new Journal("Journal Masse Salariale",this);
 	protected Journal journalCump = new Journal("Journal Cump",this);
+	protected Journal journalContratCadre = new Journal("Journal Contrat Cadre",this);
+	protected Journal journalBourse = new Journal("Journal Bourse",this);
 	protected List<Variable> res = new ArrayList<Variable>();
 	protected VariablePrivee stock;
 
@@ -71,6 +75,8 @@ public class Producteur3Acteur implements IActeur {
 		res.add(journal);
 		res.add(journalMasseSalariale);
 		res.add(journalCump);
+		res.add(journalContratCadre);
+		res.add(journalBourse);
 		return res;
 	}
 
