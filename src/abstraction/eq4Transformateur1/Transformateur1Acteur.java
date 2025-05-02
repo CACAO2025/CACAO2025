@@ -7,82 +7,57 @@ import java.util.LinkedList;
 import java.util.List;
 
 import abstraction.eqXRomu.acteurs.Romu;
-import abstraction.eqXRomu.contratsCadres.ExemplaireContratCadre;
-import abstraction.eqXRomu.filiere.Banque;
 import abstraction.eqXRomu.filiere.Filiere;
 import abstraction.eqXRomu.filiere.IActeur;
 import abstraction.eqXRomu.filiere.IMarqueChocolat;
 import abstraction.eqXRomu.general.Journal;
 import abstraction.eqXRomu.general.Variable;
+import abstraction.eqXRomu.general.VariablePrivee;
 import abstraction.eqXRomu.produits.Chocolat;
-import abstraction.eqXRomu.produits.ChocolatDeMarque; 
+import abstraction.eqXRomu.produits.ChocolatDeMarque;
 import abstraction.eqXRomu.produits.Feve;
 import abstraction.eqXRomu.produits.IProduit; 
 
 public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 
-	//nos journaux
 	protected Journal journal;	
 	protected Journal journalStock;
 	protected Journal journalCC;
 	protected Journal journalTransactions;
 	protected Journal journalPeremption;
-	protected Journal journalCouts;
+	protected int cryptogramme;
 
-	protected int cryptogramme; // Notre cryptogramme, qui nous est attribué par la banque
-
-	// Les produits exploitées par notre transformateur
 	protected List<Feve> lesFeves; 
 	protected List<Chocolat> lesChocolats;
 	protected List<ChocolatDeMarque> chocolatsLimDt; 
 
+
+
 	//Stock de fèves
-	protected Variable stock_F_MQ;
+	protected Variable stock_F_BQ;
 	protected Variable stock_F_BQ_E;
 	protected Variable stock_F_MQ_E;
 	protected Variable stock_F_HQ_BE;
 	protected HashMap<Feve, Variable> stocksFevesVar;
 
 	//Stock de chocolat NON MARQUE
-	protected Variable stock_C_MQ;
+	protected Variable stock_C_BQ;
 	protected Variable stock_C_BQ_E;
 	protected Variable stock_C_MQ_E;
 	protected Variable stock_C_HQ_BE;
 	protected HashMap<Chocolat, Variable> stocksChocoVar;
 
 	//Stock de chocolat de marque
-	protected Variable stock_C_MQ_Limdt;
+	protected Variable stock_C_BQ_Limdt;
 	protected Variable stock_C_BQ_E_Limdt;
 	protected Variable stock_C_MQ_E_Limdt;
 	protected Variable stock_C_HQ_BE_Limdt;
 	protected HashMap<ChocolatDeMarque, Variable> stocksMarqueVar;
 
-	// Tableux qui tracent la péremption de nos chocolats de marque
-	protected double[] péremption_C_MQ_Limdt = new double[12];
+	protected double[] péremption_C_BQ_Limdt = new double[12];
 	protected double[] péremption_C_BQ_E_Limdt = new double[12];
 	protected double[] péremption_C_MQ_E_Limdt = new double[12];
 	protected double[] péremption_C_HQ_BE_Limdt = new double[12];
-
-	//Listes regroupant les contrats cadres actifs
-	protected List<ExemplaireContratCadre> mesContratEnTantQuAcheteur;
-	protected List<ExemplaireContratCadre> mesContratEnTantQueVendeur;
-
-	protected HashMap<Feve, HashMap<Chocolat, Double>> pourcentageTransfo; // pour les differentes feves, le chocolat qu'elles peuvent contribuer a produire avec le ratio qttChocoProduit/qttFevesUtilisée
-
-	//Des tables de hachages pour connaître l'état des chocolats à une période précise
-	protected HashMap<Feve, Double> qttEntrantesFeve; //Contient les quantités entrant dans le stock à la période actuelle
-	protected HashMap<Feve, Double> prixTFeveStockee; //Contient les prix moyens des fèves en stock
-	protected HashMap<Chocolat, Double> prixTChocoBase; //Contient les prix des chocolats produits en s'appuyant sur le prix du stock de fèves
-	protected HashMap<Chocolat, Double> qttSortantesChoco; //Contient les quantités sortantes de chocolat à la période actuelle (CC + enchères + AO)
-	protected HashMap<Chocolat, Double> marges; // les marges sur nos produits
-	protected Variable qttFevesAcheteesBourse; // La quantité de fèves MQ achetées en bourse
-	protected HashMap<Chocolat, Double> qttSortantesTransactions; //Contient les quantités sortantes de chocolat à la période actuelle (enchères + AO)
-
-	// Variables indiquant nos prix de vente
-	protected Variable prix_Limdt_MQ;
-	protected Variable prix_Limdt_BQ_E; 
-	protected Variable prix_Limdt_MQ_E;
-	protected Variable prix_Limdt_HQ_BE;
 
 
 	/**
@@ -98,86 +73,71 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 		this.journalCC = new Journal("Journal CC " + this.getNom(), this);
 		this.journalTransactions = new Journal("Journal Transactions " + this.getNom(), this);
 		this.journalPeremption = new Journal("Journal Péremption " + this.getNom(), this);
-		this.journalCouts = new Journal("Journal Coûts " + this.getNom(), this);
+
+
+
 
 		//On fixe les types de fèves dont on aura besoin
 		this.lesFeves = new LinkedList<Feve>();
 		this.lesFeves.add(Feve.F_HQ_BE);
 		this.lesFeves.add(Feve.F_MQ_E);
 		this.lesFeves.add(Feve.F_BQ_E);
-		this.lesFeves.add(Feve.F_MQ);
+		this.lesFeves.add(Feve.F_BQ);
+
 
 		//On fixe les type de chocolat que l'on va produire
 		this.lesChocolats = new LinkedList<Chocolat>();
-		this.lesChocolats.add(Chocolat.C_MQ);
+		this.lesChocolats.add(Chocolat.C_BQ);
 		this.lesChocolats.add(Chocolat.C_BQ_E);
 		this.lesChocolats.add(Chocolat.C_MQ_E);
 		this.lesChocolats.add(Chocolat.C_HQ_BE);
+
+
+
 
 		//Constructions des variables de stocks 
 		/**
 		 * @author MURY Julien
 		 * @author ABBASSI Rayene
 		 */
-		this.stock_F_MQ =new Variable("F_MQ","<html>Quantite totale de F_MQ en stock</html>", this, 0., 1000000., 5000.);
+		this.stock_F_BQ =new Variable("F_BQ","<html>Quantite totale de F_BQ en stock</html>", this, 0., 1000000., 5000.);
 		this.stock_F_BQ_E = new Variable("F_BQ_E","<html>Quantite totale de F_BQ_E en stock</html>", this, 0., 1000000., 5000.);
 		this.stock_F_MQ_E = new Variable("F_MQ_E", "<html>Quantite totale de F_MQ_E en stock</html>", this, 0., 1000000., 5000.);
 		this.stock_F_HQ_BE = new Variable("F_HQ_BE", "<html>Quantite totale de F_HQ_BE en stock</html>", this, 0., 1000000., 5000.);
 
-		this.stock_C_MQ=new Variable("EQ4T Stock C_MQ", "<html>Quantite totale de C_MQ en stock</html>",this, 0.0, 1000000.0, 0.0);
+		this.stock_C_BQ=new Variable("EQ4T Stock C_BQ", "<html>Quantite totale de C_BQ en stock</html>",this, 0.0, 1000000.0, 0.0);
 		this.stock_C_BQ_E=new Variable("EQ4T Stock C_BQ_E", "<html>Quantite totale de C_BQ_E en stock</html>",this, 0.0, 1000000.0, 0.0);
 		this.stock_C_MQ_E=new Variable("EQ4T Stock C_MQ_E", "<html>Quantite totale de C_MQ_E en stock</html>",this, 0.0, 1000000.0, 0.0);
 		this.stock_C_HQ_BE=new Variable("EQ4T Stock C_HQ_BE", "<html>Quantite totale de C_HQ_BE en stock</html>",this, 0.0, 1000000.0, 0.0);
 		
-		this.stock_C_MQ_Limdt=new Variable("EQ4T Stock C_MQ_Limdt", "<html>Quantite totale de C_MQ_Limdt en stock</html>",this, 0.0, 1000000.0, 40000.0);
+		this.stock_C_BQ_Limdt=new Variable("EQ4T Stock C_BQ_Limdt", "<html>Quantite totale de C_BQ_Limdt en stock</html>",this, 0.0, 1000000.0, 40000.0);
 		this.stock_C_BQ_E_Limdt=new Variable("EQ4T Stock C_BQ_E_Limdt", "<html>Quantite totale de C_BQ_E_Limdt en stock</html>",this, 0.0, 1000000.0, 40000.0);
 		this.stock_C_MQ_E_Limdt=new Variable("EQ4T Stock C_MQ_E_Limdt", "<html>Quantite totale de C_MQ_E_Limdt en stock</html>",this, 0.0, 1000000.0, 40000.0);
 		this.stock_C_HQ_BE_Limdt=new Variable("EQ4T Stock C_HQ_BE_Limdt", "<html>Quantite totale de C_HQ_BE_Limdt en stock</html>",this, 0.0, 1000000.0, 40000.0);
 	
-        // Initialisation des hashmaps de stocks
+
 		this.stocksFevesVar = new HashMap<Feve, Variable>();
-		this.stocksFevesVar.put(Feve.F_MQ, stock_F_MQ);
+		this.stocksFevesVar.put(Feve.F_BQ, stock_F_BQ);
 		this.stocksFevesVar.put(Feve.F_BQ_E, stock_F_BQ_E);
 		this.stocksFevesVar.put(Feve.F_MQ_E, stock_F_MQ_E);
 		this.stocksFevesVar.put(Feve.F_HQ_BE, stock_F_HQ_BE);
 
 		this.stocksChocoVar= new HashMap<Chocolat, Variable>();
-		this.stocksChocoVar.put(Chocolat.C_MQ, stock_C_MQ);
+		this.stocksChocoVar.put(Chocolat.C_BQ, stock_C_BQ);
 		this.stocksChocoVar.put(Chocolat.C_BQ_E, stock_C_BQ_E);
 		this.stocksChocoVar.put(Chocolat.C_MQ_E, stock_C_MQ_E);
 		this.stocksChocoVar.put(Chocolat.C_HQ_BE, stock_C_HQ_BE);
 
+
 		this.stocksMarqueVar = new HashMap<ChocolatDeMarque, Variable>();
 
-		// Initialisation des variables de péremption
-        this.péremption_C_MQ_Limdt = new double[12];
+        this.péremption_C_BQ_Limdt = new double[12];
 		this.péremption_C_BQ_E_Limdt = new double[12];
 		this.péremption_C_MQ_E_Limdt = new double[12];
 		this.péremption_C_HQ_BE_Limdt = new double[12];
-
-		this.pourcentageTransfo = new HashMap<Feve, HashMap<Chocolat, Double>>();
-		
-		this.prixTFeveStockee = new HashMap<Feve, Double>();
-		this.prixTChocoBase = new HashMap<Chocolat, Double>();
-
-		this.prix_Limdt_MQ = new Variable("Prix LimDt MQ", "<html>Prix de vente du chocolat de marque MQ</html>", this, 0., 1000000., 0.);
-		this.prix_Limdt_BQ_E = new Variable("Prix LimDt BQ_E", "<html>Prix de vente du chocolat de marque BQ_E</html>", this, 0., 1000000., 0.);
-		this.prix_Limdt_MQ_E = new Variable("Prix LimDt MQ_E", "<html>Prix de vente du chocolat de marque MQ_E</html>", this, 0., 1000000., 0.);
-		this.prix_Limdt_HQ_BE = new Variable("Prix LimDt HQ_BE", "<html>Prix de vente du chocolat de marque HQ_BE</html>", this, 0., 1000000., 0.);
-
-		this.qttEntrantesFeve = new HashMap<Feve, Double>();
-		this.qttSortantesChoco = new HashMap<Chocolat, Double>();
-		this.qttSortantesTransactions = new HashMap<Chocolat, Double>();
-		this.qttFevesAcheteesBourse = new Variable("Qtt Feves Achetees Bourse", "<html>Quantité de fèves achetées en bourse</html>", this, 0., 1000000., 1000.);
-
-		this.marges = new HashMap<Chocolat, Double>();
+	
 	}
 
-	/**
-	 * @author MURY Julien
-	 * @author ABBASSI Rayene
-	 * @author YAOU Reda : Gestion de la péremption et organisation des journaux
-	 */
 	public void initialiser() {
 		
 		//On fixe les chocolats de marque que l'on va produire
@@ -187,18 +147,20 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 			int pourcentageCacao =  (int) (Filiere.LA_FILIERE.getParametre("pourcentage min cacao "+c.getGamme()).getValeur());
 			ChocolatDeMarque cm= new ChocolatDeMarque(c, "LimDt", pourcentageCacao);
 			this.chocolatsLimDt.add(cm);
+
 		}
 
-		//Initialisation des stocks de chocolat de marque et du journal de péremption
+
+		//Initialisation des stocks de chocolat de marque
 		for (ChocolatDeMarque cm : chocolatsLimDt){
 			switch (cm.getChocolat()){
-				case C_MQ : 
-					stocksMarqueVar.put(cm, stock_C_MQ_Limdt);
+				case C_BQ : 
+					stocksMarqueVar.put(cm, stock_C_BQ_Limdt);
 
-					this.péremption_C_MQ_Limdt[0] = stock_C_MQ_Limdt.getValeur();
+					this.péremption_C_BQ_Limdt[0] = stock_C_BQ_Limdt.getValeur();
 
 					for (int i=1; i<12; i++){
-						this.péremption_C_MQ_Limdt [i] = 0.0;
+						this.péremption_C_BQ_Limdt [i] = 0.0;
 					}
 					break;
 				case C_BQ_E : 
@@ -239,67 +201,6 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 			this.journalStock.ajouter("\n");
 		}
 
-		//Initialisation des prix de nos stocks de fève
-		this.prixTFeveStockee.put(Feve.F_MQ, 2000.);
-		this.prixTFeveStockee.put(Feve.F_BQ_E, 2000.);
-		this.prixTFeveStockee.put(Feve.F_MQ_E, 2000.);
-		this.prixTFeveStockee.put(Feve.F_HQ_BE, 2000.);
-
-		//Initialisation des prix de base des chocolats que l'on veut produire
-		this.prixTChocoBase.put(Chocolat.C_MQ, 2000.);
-		this.prix_Limdt_MQ.setValeur(this, 2000.);
-
-		this.prixTChocoBase.put(Chocolat.C_BQ_E, 2000.);
-		this.prix_Limdt_BQ_E.setValeur(this, 2000.);
-
-		this.prixTChocoBase.put(Chocolat.C_MQ_E, 2000.);
-		this.prix_Limdt_MQ_E.setValeur(this, 2000.);
-
-		this.prixTChocoBase.put(Chocolat.C_HQ_BE, 2000.);
-		this.prix_Limdt_HQ_BE.setValeur(this, 2000.);
-		
-
-		//Initialisation des marges que l'on va faire sur les différents produits
-		this.marges.put(Chocolat.C_MQ, 1.5);
-		this.marges.put(Chocolat.C_BQ_E, 1.16);
-		this.marges.put(Chocolat.C_MQ_E, 1.16);
-		this.marges.put(Chocolat.C_HQ_BE, 1.3);
-
-
-		//Initialisation des pourcentage de conversion fèves vers chocolat
-		this.pourcentageTransfo.put(Feve.F_HQ_BE, new HashMap<Chocolat, Double>());
-		double conversion = 1.0 + (100.0 - Filiere.LA_FILIERE.getParametre("pourcentage min cacao HQ").getValeur())/100.0;
-		this.pourcentageTransfo.get(Feve.F_HQ_BE).put(Chocolat.C_HQ_BE, conversion);// la masse de chocolat obtenue est plus importante que la masse de feve vue l'ajout d'autres ingredients
-
-		this.pourcentageTransfo.put(Feve.F_MQ_E, new HashMap<Chocolat, Double>());
-		conversion = 1.0 + (100.0 - Filiere.LA_FILIERE.getParametre("pourcentage min cacao MQ").getValeur())/100.0;
-		this.pourcentageTransfo.get(Feve.F_MQ_E).put(Chocolat.C_MQ_E, conversion);
-
-		this.pourcentageTransfo.put(Feve.F_MQ, new HashMap<Chocolat, Double>());
-		this.pourcentageTransfo.get(Feve.F_MQ).put(Chocolat.C_MQ, conversion);
-
-		this.pourcentageTransfo.put(Feve.F_BQ_E, new HashMap<Chocolat, Double>());
-		conversion = 1.0 + (100.0 - Filiere.LA_FILIERE.getParametre("pourcentage min cacao BQ").getValeur())/100.0;
-		this.pourcentageTransfo.get(Feve.F_BQ_E).put(Chocolat.C_BQ_E, conversion);
-
-
-		this.journalStock.ajouter(Romu.COLOR_LLGRAY, Color.PINK, "Stock initial chocolat de marque : ");
-
-		this.journalCC.ajouter(Color.orange, Color.BLACK, "Les achats seront en marron;");
-		this.journalCC.ajouter(Color.orange, Color.BLACK, "Les ventes LimDt en mauve;");
-		this.journalCC.ajouter(Color.orange, Color.BLACK, "Et les autres ventes en vert.");
-		this.journalCC.ajouter("\n");
-
-		this.journalTransactions.ajouter(Color.orange, Color.BLACK, "Les achats en bourse seront en magenta;");
-		this.journalTransactions.ajouter(Color.orange, Color.BLACK, "Les ventes aux enchères en gris foncé;");
-		this.journalTransactions.ajouter(Color.orange, Color.BLACK, "Et les ventes AO en rouge.");
-		this.journalTransactions.ajouter("\n");
-
-		//Initialisation des quantités de fève entrantes
-		this.qttEntrantesFeve.put(Feve.F_MQ, 0.);
-		this.qttEntrantesFeve.put(Feve.F_BQ_E, 0.);
-		this.qttEntrantesFeve.put(Feve.F_HQ_BE, 0.);
-		this.qttEntrantesFeve.put(Feve.F_MQ_E, 0.);
 	}
 
 
@@ -316,28 +217,17 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 	////////////////////////////////////////////////////////
 
 	public void next() {
+		
+		/*
+		this.journalStock.ajouter("Stock de fèves : " + this.totalStocksFeves.getValeur(this.cryptogramme));
+		this.journalStock.ajouter("Stock de chocolat : " + this.totalStocksChoco.getValeur(this.cryptogramme));
+		this.journalStock.ajouter("Stock de chocolat de marque : " + this.totalStocksChocoMarque.getValeur(this.cryptogramme));
+		this.journalStock.ajouter("\n");
+		*/
+
 		this.journal.ajouter("Solde : " + this.getSolde());
 		this.journal.ajouter("\n");
 
-		this.journal.ajouter("##########");
-		this.journal.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
-
-		this.journalStock.ajouter("\n");
-		this.journalStock.ajouter("##########");
-		this.journalStock.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
-
-		this.journalCC.ajouter("##########");
-		this.journalCC.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
-
-		this.journalTransactions.ajouter("##########");
-		this.journalTransactions.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
-
-		this.journalPeremption.ajouter("\n");
-		this.journalPeremption.ajouter("##########");
-		this.journalPeremption.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
-
-		this.journalCouts.ajouter("##########");
-		this.journalCouts.ajouter(Color.yellow, Romu.COLOR_LBLUE, "N° Etape " + Filiere.LA_FILIERE.getEtape());
 	}
 
 	public Color getColor() {// NE PAS MODIFIER
@@ -351,6 +241,7 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 	// Renvoie les indicateurs
 	public List<Variable> getIndicateurs() {
 		List<Variable> res = new ArrayList<Variable>();
+		
 		return res;
 	}
 
@@ -368,7 +259,6 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 		res.add(this.journalTransactions);
 		res.add(this.journalCC);
 		res.add(this.journalPeremption);
-		res.add(this.journalCouts);
 		return res;
 	}
 
@@ -422,6 +312,8 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 		return marques;
 	}
 
+
+
 	/**
 	 * @author MURY Julien
 	 * Cette méthode permet de connaitre notre stock d'un produit bien précis, très utile si on ne veut qu'accéder au stock sans nécessairement faire de modifications.
@@ -453,5 +345,204 @@ public class Transformateur1Acteur implements IActeur, IMarqueChocolat {
 			return 0; // Les acteurs non assermentes n'ont pas a connaitre notre stock
 		}
 	}
+
+
+
+/**
+ * @author MURY Julien
+ * Cette méthode permet l'ajout en stock d'une certaine quantité d'un certain produit
+ * @param produit : le produit à ajouter
+ * @param quantite : la quantité de produit à ajouter 
+ */
+	public void ajouterAuStock(IProduit produit, double quantite, int cryptogramme){
+		//On vérifie que l'acteur voulant accéder aux stocks est bien le bon 
+		if (this.cryptogramme == cryptogramme){
+
+			String type = produit.getType();
+
+			if (type.equals("Feve")){
+				switch ((Feve)produit){
+					case F_BQ : 
+						this.stocksFevesVar.get(Feve.F_BQ).ajouter(this, quantite, cryptogramme);
+						break;
+					case F_BQ_E : 
+						this.stocksFevesVar.get(Feve.F_BQ_E).ajouter(this, quantite, cryptogramme);
+						break;
+					case F_MQ_E : 
+						this.stocksFevesVar.get(Feve.F_MQ_E).ajouter(this, quantite, cryptogramme);
+						break;
+					case F_HQ_BE : 
+						this.stocksFevesVar.get(Feve.F_HQ_BE).ajouter(this, quantite, cryptogramme);
+						break;
+					default : 
+						journalStock.ajouter(Color.pink, Color.BLACK, "EQ4T : Ce type de fève n'est pas censée entrer dans nos stocks: " + produit);
+				}
+				
+			}
+			else if (type.equals("Chocolat")){
+				switch ((Chocolat)produit){
+					case C_BQ : 
+						this.stocksChocoVar.get(Chocolat.C_BQ).ajouter(this, quantite, cryptogramme);
+						break;
+					case C_BQ_E : 
+						this.stocksChocoVar.get(Chocolat.C_BQ_E).ajouter(this, quantite, cryptogramme);
+						break;
+					case C_MQ_E : 
+						this.stocksChocoVar.get(Chocolat.C_MQ_E).ajouter(this, quantite, cryptogramme);
+						break;
+					case C_HQ_BE : 
+						this.stocksChocoVar.get(Chocolat.C_HQ_BE).ajouter(this, quantite, cryptogramme);
+						break;
+					default : 
+						journalStock.ajouter(Color.pink, Color.BLACK,"EQ4T : Ce type de chocolat n'est pas censée entrer dans nos stocks: " + produit);
+				}
+
+			}
+			else if (type.equals("ChocolatDeMarque")){
+				switch (((ChocolatDeMarque)produit).getChocolat()){
+					case C_BQ : 
+						this.stocksMarqueVar.get(produit).ajouter(this, quantite, cryptogramme);
+						this.péremption_C_BQ_Limdt[0] += quantite;
+						break;
+					case C_BQ_E : 
+						this.stocksMarqueVar.get(produit).ajouter(this, quantite, cryptogramme);
+						this.péremption_C_BQ_E_Limdt[0] += quantite;
+						break;
+					case C_MQ_E : 
+						this.stocksMarqueVar.get(produit).ajouter(this, quantite, cryptogramme);
+						this.péremption_C_MQ_E_Limdt[0] += quantite;
+						break;
+					case C_HQ_BE : 
+						this.stocksMarqueVar.get(produit).ajouter(this, quantite, cryptogramme);
+						this.péremption_C_HQ_BE_Limdt[0] += quantite;
+						break;
+					default : 
+						journalStock.ajouter(Color.pink, Color.BLACK,"EQ4T : Ce type de chocolat n'est pas censée entrer dans nos stocks: " + produit);
+				}
+			}
+			else {
+				journalStock.ajouter(Color.pink, Color.BLACK,"Ce produit (" + produit + ") n'a pas un type connu ("+ type + ")");
+			}
+		}
+	}
+
+
+
+
+
+
+	
+
+	/**
+ * @author MURY Julien
+ * Cette méthode permet le retrait du stock d'une certaine quantité d'un certain produit
+ * @param produit : le produit à ajouter
+ * @param quantite : la quantité de produit à ajouter 
+ */
+public void retirerDuStock(IProduit produit, double quantite, int cryptogramme){
+	//On vérifie que l'acteur voulant accéder aux stocks est bien le bon 
+	if (this.cryptogramme == cryptogramme){
+		String type = produit.getType();
+		if (type.equals("Feve")){
+			switch ((Feve)produit){
+				case F_BQ : 
+					this.stocksFevesVar.get(Feve.F_BQ).retirer(this, quantite, cryptogramme);
+					break;
+				case F_BQ_E : 
+					this.stocksFevesVar.get(Feve.F_BQ_E).retirer(this, quantite, cryptogramme);
+					break;
+				case F_MQ_E : 
+					this.stocksFevesVar.get(Feve.F_MQ_E).retirer(this, quantite, cryptogramme);
+					break;
+				case F_HQ_BE : 
+					this.stocksFevesVar.get(Feve.F_HQ_BE).retirer(this, quantite, cryptogramme);
+					break;
+				default : 
+					journalStock.ajouter(Color.pink, Color.BLACK,"EQ4T : Ce type de fève n'est pas censée entrer dans nos stocks: " + produit);
+			}
+			
+		}
+		else if (type.equals("Chocolat")){
+			switch ((Chocolat)produit){
+				case C_BQ : 
+					this.stocksChocoVar.get(Chocolat.C_BQ).retirer(this, quantite, cryptogramme);
+					break;
+				case C_BQ_E : 
+					this.stocksChocoVar.get(Chocolat.C_BQ_E).retirer(this, quantite, cryptogramme);
+					break;
+				case C_MQ_E : 
+					this.stocksChocoVar.get(Chocolat.C_MQ_E).retirer(this, quantite, cryptogramme);
+					break;
+				case C_HQ_BE : 
+					this.stocksChocoVar.get(Chocolat.C_HQ_BE).retirer(this, quantite, cryptogramme);
+					break;
+				default : 
+					journalStock.ajouter(Color.pink, Color.BLACK,"EQ4T : Ce type de chocolat n'est pas censée entrer dans nos stocks: " + produit);
+			}
+
+		}
+		else if (type.equals("ChocolatDeMarque")){
+			switch (((ChocolatDeMarque)produit).getChocolat()){
+				case C_BQ : 
+					this.stocksMarqueVar.get(produit).retirer(this, quantite, cryptogramme);
+					for (int i=11; i>=0; i--){
+						if (this.péremption_C_BQ_Limdt[i] > 0 && this.péremption_C_BQ_Limdt[i] - quantite >= 0){
+							this.péremption_C_BQ_Limdt[i] -= quantite;
+							break;
+						}
+						else if (this.péremption_C_BQ_Limdt[i] > 0 && this.péremption_C_BQ_Limdt[i] - quantite < 0){
+							quantite -= this.péremption_C_BQ_Limdt[i];
+							this.péremption_C_BQ_Limdt[i] = 0;
+						}
+					}
+					break;
+				case C_BQ_E : 
+					this.stocksMarqueVar.get(produit).retirer(this, quantite, cryptogramme);
+					for (int i=11; i>=0; i--){
+						if (this.péremption_C_BQ_E_Limdt[i] > 0 && this.péremption_C_BQ_E_Limdt[i] - quantite >= 0){
+							this.péremption_C_BQ_E_Limdt[i] -= quantite;
+							break;
+						}
+						else if (this.péremption_C_BQ_E_Limdt[i] > 0 && this.péremption_C_BQ_E_Limdt[i] - quantite < 0){
+							quantite -= this.péremption_C_BQ_E_Limdt[i];
+							this.péremption_C_BQ_E_Limdt[i] = 0;
+						}
+					}
+					break;
+				case C_MQ_E : 
+					this.stocksMarqueVar.get(produit).retirer(this, quantite, cryptogramme);
+					for (int i=11; i>=0; i--){
+						if (this.péremption_C_MQ_E_Limdt[i] > 0 && this.péremption_C_MQ_E_Limdt[i] - quantite >= 0){
+							this.péremption_C_MQ_E_Limdt[i] -= quantite;
+							break;
+						}
+						else if (this.péremption_C_MQ_E_Limdt[i] > 0 && this.péremption_C_MQ_E_Limdt[i] - quantite < 0){
+							quantite -= this.péremption_C_MQ_E_Limdt[i];
+							this.péremption_C_MQ_E_Limdt[i] = 0;
+						}
+					}
+					break;
+				case C_HQ_BE : 
+					this.stocksMarqueVar.get(produit).retirer(this, quantite, cryptogramme);
+					for (int i=11; i>=0; i--){
+						if (this.péremption_C_HQ_BE_Limdt[i] > 0 && this.péremption_C_HQ_BE_Limdt[i] - quantite >= 0){
+							this.péremption_C_HQ_BE_Limdt[i] -= quantite;
+							break;
+						}
+						else if (this.péremption_C_HQ_BE_Limdt[i] > 0 && this.péremption_C_HQ_BE_Limdt[i] - quantite < 0){
+							quantite -= this.péremption_C_HQ_BE_Limdt[i];
+							this.péremption_C_HQ_BE_Limdt[i] = 0;
+						}
+					}
+					break;
+				default : 
+					journalStock.ajouter(Color.pink, Color.BLACK,"EQ4T : Ce type de chocolat n'est pas censée entrer dans nos stocks: " + produit);
+			}
+		}
+		else {
+			journalStock.ajouter(Color.pink, Color.BLACK,"Ce produit (" + produit + ") n'a pas un type connu ("+ type + ")");
+		}
+	}
 }
 
+}

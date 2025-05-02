@@ -19,8 +19,6 @@ import abstraction.eqXRomu.produits.Chocolat;
 
 import abstraction.eqXRomu.acteurs.Romu;
 
-// Classe représentant un acheteur utilisant des contrats cadres pour s'approvisionner en chocolat de marque.
-
 public class Distributeur2AcheteurContratCadre extends Distributeur2Vendeur implements IAcheteurContratCadre{
 
 	
@@ -42,7 +40,6 @@ public class Distributeur2AcheteurContratCadre extends Distributeur2Vendeur impl
 	}
     
     //@author ArmandCHANANE
-    // Méthode pour initialiser les paramètres spécifiques aux contrats cadres.
     public void initialiser() {
 		super.initialiser();
         
@@ -55,7 +52,6 @@ public class Distributeur2AcheteurContratCadre extends Distributeur2Vendeur impl
     }
     
     //@author tidzzz
-    // Méthode pour décider si un produit doit être acheté en fonction des stocks et des besoins.
     public boolean achete(IProduit produit) {
         if (produit instanceof ChocolatDeMarque 
         && produit_voulue.contains(produit)   
@@ -66,7 +62,7 @@ public class Distributeur2AcheteurContratCadre extends Distributeur2Vendeur impl
         return false;
     }
 
-    // Méthode pour gérer les contre-propositions d'échéancier dans les contrats cadres.
+    // Méthode pour la contre-proposition de l'échéancier
 public Echeancier contrePropositionDeLAcheteur(ExemplaireContratCadre contrat) {
     Echeancier echeancier = contrat.getEcheancier();
     IProduit produit = contrat.getProduit();
@@ -94,7 +90,7 @@ public Echeancier contrePropositionDeLAcheteur(ExemplaireContratCadre contrat) {
     return echeancier;
 }
 
-// Méthode pour gérer les contre-propositions de prix dans les contrats cadres.
+// Méthode pour la contre-proposition du prix
 public double contrePropositionPrixAcheteur(ExemplaireContratCadre contrat) {
     double prixPropose = contrat.getPrix();
     IProduit produit = contrat.getProduit();

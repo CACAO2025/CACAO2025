@@ -20,8 +20,10 @@ import abstraction.eqXRomu.clients.ClientFinal;
 
 import abstraction.eqXRomu.general.Journal;
 
-// Classe représentant un vendeur de chocolat de marque, avec des capacités de gestion des prix, des stocks et des ventes.
-// Elle implémente l'interface IDistributeurChocolatDeMarque pour fournir des fonctionnalités spécifiques aux distributeurs.
+
+
+
+
 public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistributeurChocolatDeMarque {
     
     
@@ -49,10 +51,9 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 		
 		this.equipe = new LinkedList<String>();
 		
-		this.aVendu = new HashMap<ChocolatDeMarque, Boolean>();
+		this.aVendu = new HashMap<ChocolatDeMarque,Boolean>();
 	}
 
-	// Méthode pour initialiser les paramètres du vendeur, comme les prix et les équipes partenaires.
 	public void initialiser () {
 		super.initialiser();
 		for (ChocolatDeMarque choco : chocolats) {
@@ -70,24 +71,24 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 		}
 	}
 
-	// Méthode pour définir les prix des chocolats en fonction de leur type.
-	public void setPrix(ChocolatDeMarque choco) {
 
-		if (choco.getChocolat() == Chocolat.C_MQ_E) {
-			ListPrix.put(choco, (double) 10000);
-		}
+public void setPrix(ChocolatDeMarque choco) {
+
+	if (choco.getChocolat() == Chocolat.C_MQ_E) {
+		ListPrix.put(choco, (double) 10000);
+	}
 	
 
-		if (choco.getChocolat() == Chocolat.C_HQ_E) {
-			ListPrix.put(choco, (double) 22000);
-		}
-		if (choco.getChocolat() == Chocolat.C_HQ_BE) {
-			ListPrix.put(choco, (double) 30000);
-		}
-
+	if (choco.getChocolat() == Chocolat.C_HQ_E) {
+		ListPrix.put(choco, (double) 22000);
+	}
+	if (choco.getChocolat() == Chocolat.C_HQ_BE) {
+		ListPrix.put(choco, (double) 30000);
 	}
 
-	// Méthode pour obtenir le prix d'un chocolat de marque spécifique.
+}
+
+
     public double prix(ChocolatDeMarque cm){
         if (ListPrix.containsKey(cm)) {
 			return ListPrix.get(cm);
@@ -97,7 +98,7 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 		}
     }
 
-	// Méthode pour calculer la quantité de chocolat en vente en fonction de la capacité de vente et du stock disponible.
+    
     public double quantiteEnVente(ChocolatDeMarque choco, int crypto){
         if (crypto!=this.cryptogramme || !chocolats.contains(choco)) {
 			journalVente.ajouter("Quelqu'un essaye de me pirater !");
@@ -174,6 +175,7 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 				stock_Choco.put(choco, nouveauStock);
 				this.aVendu.replace(choco, true);
 				journalVente.ajouter(Romu.COLOR_GREEN, Romu.COLOR_LLGRAY, client.getNom()+" a acheté "+String.format("%.2f", quantite)+"kg de "+choco+" pour "+String.format("%.2f", montant)+" d'euros ");
+
 			} else {
 				journalVente.ajouter("ERREUR : Tentative de vendre plus que le stock disponible pour "+choco);
 			}
@@ -209,7 +211,9 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 			journalVente.ajouter(Romu.COLOR_LLGRAY, Romu.COLOR_PURPLE,"prix de vente pour le chocolats "+choco+" est de : "+String.format("%.2f", this.prix(choco)));
 		}
 		
-		
+		for (int i=0;i<this.ListPrix.size(); i++) {
+			this.setPrix(chocolats.get(i));
+		}
 
 		ajusterPrix();
 		
@@ -220,25 +224,11 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 			capaciteDeVente = 120000;
 		}
 
-		for (ChocolatDeMarque choco : chocolats) {
-			if (choco.getChocolat() == Chocolat.C_HQ_E || choco.getChocolat() == Chocolat.C_HQ_BE || choco.getChocolat() == Chocolat.C_MQ_E){	
-				if (aVendu.get(choco) == true) {
-					journalVente.ajouter(Romu.COLOR_LLGRAY, Romu.COLOR_GREEN,"J'ai vendu du "+choco);
-				}
-				else {
-					journalVente.ajouter(Romu.COLOR_LLGRAY, Romu.COLOR_BROWN,"Je n'ai pas vendu de "+choco);
-				}
-				journalVente.ajouter("");
-			}
-		}
-		// Réinitialisation de la variable aVendu pour le prochain step
-		for (ChocolatDeMarque choco : chocolats) {
-			this.aVendu.replace(choco, false);
-		}
+		
 		
 	}
 
-	// Méthode pour ajuster les prix des chocolats en fonction du stock et des limites définies.
+	
 	public void ajusterPrix() {
 		for (ChocolatDeMarque cm : chocolats) {
 			if (cm.getChocolat() == Chocolat.C_HQ_E || cm.getChocolat() == Chocolat.C_HQ_BE || cm.getChocolat() == Chocolat.C_MQ_E){
@@ -251,15 +241,12 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 				// Ajustement en fonction du stock
 				if (stockActuel < 3000) {
 					// Si stock faible, augmenter les prix
-					prixActuel = prixActuel * 1.05; // +5%
+					prixActuel *= 1.05; // +5%
 					prixModifie = true;
 					raisonModification = "stock faible";
 				} else if (stockActuel > 10000) {
 					// Si stock élevé, baisser les prix
-					/* System.out.println("étape:"+Filiere.LA_FILIERE.getEtape()+" changement prix du chocolat "+cm+ "dû à un stock élevé");
-					System.out.println("ancien prix : "+prixActuel); */
-					prixActuel = prixActuel * 0.98; // -2%
-					//System.out.println("nouveau prix : "+prixActuel);
+					prixActuel *= 0.98; // -2%
 					prixModifie = true;
 					raisonModification = "stock élevé";
 				}
@@ -282,50 +269,27 @@ public class Distributeur2Vendeur extends Distributeur2Acteur implements IDistri
 					prixMaximum = 11000;
 				}
 				
-				// Ajustement en fonction des ventes
-				if (this.aVendu.getOrDefault(cm, false) == false) {
-					/* System.out.println("étape:"+Filiere.LA_FILIERE.getEtape()+" changement prix du chocolat "+cm+ "dû à aucune vente");
-					System.out.println("ancien prix : "+prixActuel); */
-					prixActuel = prixOriginal * 0.95; // -5%
-					/* System.out.println("nouveau prix : "+prixActuel); */
+				// Vérifier que le prix est dans les limites
+				if (prixActuel < prixMinimum) {
+					prixActuel = prixMinimum;
 					prixModifie = true;
-					
-					raisonModification = "aucune vente au step précédent";
+					raisonModification = "prix minimum atteint";
+				} else if (prixActuel > prixMaximum) {
+					prixActuel = prixMaximum;
+					prixModifie = true;
+					raisonModification = "prix maximum atteint";
 				}
 				
-                
-                if (prixActuel < prixMinimum) {
-                    prixActuel = prixMinimum;
-                    prixModifie = true;
-                    if (raisonModification.isEmpty()) {
-                        raisonModification = "prix minimum atteint";
-                    } else {
-                        raisonModification = raisonModification + " + prix minimum atteint";
-                    }
-                } else if (prixActuel > prixMaximum) {
-                    prixActuel = prixMaximum;
-                    prixModifie = true;
-                    if (raisonModification.isEmpty()) {
-                        raisonModification = "prix maximum atteint"; 
-                    } else {
-                        raisonModification = raisonModification + " + prix maximum atteint";
-                    }
-                }
-                
-                //System.out.println("Mise à jour du prix pour " + cm + ": " + prixActuel);
 				// Mettre à jour le prix
-                ListPrix.put(cm, prixActuel);
-                
-                // Journalisation avec calcul précis du pourcentage
-                if (prixModifie) {
-                    String evolution = prixActuel > prixOriginal ? "augmenté" : "baissé";
-                    // Calcul correct du pourcentage
-                    double pourcentage = Math.abs(((prixActuel - prixOriginal) / prixOriginal) * 100);
-                    
-                    
-                    String message = "Prix de " + cm + " " + evolution + " de " + String.format("%.2f", pourcentage) + "% (" 
-                        + String.format("%.2f", prixOriginal) + " → " + String.format("%.2f", prixActuel) 
-                        + " euros) - Raison: " + raisonModification;
+				ListPrix.put(cm, prixActuel);
+				
+				// Journalisation
+				if (prixModifie) {
+					String evolution = prixActuel > prixOriginal ? "augmenté" : "baissé";
+					double pourcentage = Math.abs((prixActuel - prixOriginal) / prixOriginal * 100);
+					String message = "Prix de " + cm + " " + evolution + " de " + String.format("%.2f", pourcentage) + "% (" 
+						+ String.format("%.2f", prixOriginal) + " → " + String.format("%.2f", prixActuel) 
+						+ " euros) - Raison: " + raisonModification;
 					
 					if (evolution.equals("augmenté")) {
 						journalVente.ajouter(Romu.COLOR_LLGRAY, Romu.COLOR_GREEN, message);

@@ -19,8 +19,6 @@ import abstraction.eqXRomu.produits.Chocolat;
 
 
 
-// Classe représentant un acheteur utilisant des appels d'offres pour s'approvisionner en chocolat de marque.
-
 public class Distributeur2AcheteurAppelOffre extends Distributeur2AcheteurContratCadre implements IAcheteurAO {
     
     
@@ -36,7 +34,6 @@ public class Distributeur2AcheteurAppelOffre extends Distributeur2AcheteurContra
         
     }
 
-    // Méthode pour initialiser les paramètres spécifiques aux appels d'offres.
     public void initialiser() {
 		super.initialiser();
 		this.supAO = (SuperviseurVentesAO)(Filiere.LA_FILIERE.getActeur("Sup.AO"));
@@ -48,7 +45,7 @@ public class Distributeur2AcheteurAppelOffre extends Distributeur2AcheteurContra
 	}
 
     
-    // Méthode pour choisir la meilleure offre parmi les propositions reçues.
+    
     public OffreVente choisirOV(List<OffreVente> propositions) {
         if (propositions == null || propositions.isEmpty()) {
             return null;
@@ -71,7 +68,6 @@ public class Distributeur2AcheteurAppelOffre extends Distributeur2AcheteurContra
     }
 
 
-    // Méthode pour gérer les étapes de simulation et mettre à jour les stocks.
     public void next() {
 		super.next();
 		this.journalAO.ajouter("=== Étape "+Filiere.LA_FILIERE.getEtape()+" ====================");
@@ -85,7 +81,7 @@ public class Distributeur2AcheteurAppelOffre extends Distributeur2AcheteurContra
 				
                 journalAO.ajouter("Je lance un appel d'offre de "+quantite+"T de "+cm);
 				if (ov!=null) { 
-                    journalAO.ajouter(Romu.COLOR_LLGRAY, Romu.COLOR_GREEN, "AO finalise : on ajoute "+quantite+"T de "+cm+" au stock");
+                    journalAO.ajouter("AO finalise : on ajoute "+quantite+"T de "+cm+" au stock");
 					stock_Choco.put(cm, stock_Choco.get(cm)+quantite);
 					
 					prixRetenus.get(cm).add(ov.getPrixT());

@@ -18,8 +18,7 @@ import abstraction.eqXRomu.produits.IProduit;
 
 import abstraction.eqXRomu.acteurs.Romu;
 
-// Classe de base pour les acteurs distributeurs, gérant les stocks, les journaux et les interactions avec la filière.
-//@author tidzzz
+
 public class Distributeur2Acteur implements IActeur {
 	
 	
@@ -56,7 +55,6 @@ public class Distributeur2Acteur implements IActeur {
 		return stockTotal;
 	}
 
-    // Méthode pour initialiser les stocks et les paramètres de l'acteur distributeur.
     public void initialiser() {
 		
 		this.stock_Choco=new HashMap<ChocolatDeMarque,Double>();
@@ -169,7 +167,6 @@ public class Distributeur2Acteur implements IActeur {
 		this.cryptogramme = crypto;
 	}
 
-	// Méthode pour gérer les notifications de faillite et les opérations bancaires.
 	// Appelee lorsqu'un acteur fait faillite (potentiellement vous)
 	// afin de vous en informer.
 	public void notificationFaillite(IActeur acteur) {
@@ -200,7 +197,6 @@ public class Distributeur2Acteur implements IActeur {
 		return Filiere.LA_FILIERE;
 	}
 
-	// Méthode pour obtenir la quantité totale de chocolat en stock.
 	public double getQuantiteEnStock(IProduit p, int cryptogramme) {
 		if (this.cryptogramme==cryptogramme) { // c'est donc bien un acteur assermente qui demande a consulter la quantite en stock
 			if (stock_Choco.containsKey(p)) {
